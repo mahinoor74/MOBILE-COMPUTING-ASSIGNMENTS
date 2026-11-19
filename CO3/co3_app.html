@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CO3 | Mobile Computing Network Lab</title>
+  <link rel="stylesheet" href="co3_style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">MOBILE COMPUTING · ASSIGNMENT 3</p>
+    <h1>Wireless Mobility & Routing Lab</h1>
+    <p class="subtitle">Interactive learning and simulation workspace for CO3</p>
+    <div class="hero-tags"><span>Q1–Q7</span><span>Architecture</span><span>Mobile IP</span><span>MANET Routing</span></div>
+  </div>
+</header>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="side-title">ASSIGNMENT MODULES</div>
+    <button class="nav-btn active" data-target="q1"><span>01</span> Wireless Architecture</button>
+    <button class="nav-btn" data-target="q2"><span>02</span> Mobile IP</button>
+    <button class="nav-btn" data-target="q3"><span>03</span> Cellular vs Ad Hoc</button>
+    <button class="nav-btn" data-target="q4"><span>04</span> Mobile IP Applications</button>
+    <button class="nav-btn" data-target="q5"><span>05</span> DSDV Routing</button>
+    <button class="nav-btn" data-target="q6"><span>06</span> AODV vs DSDV</button>
+    <button class="nav-btn" data-target="q7"><span>07</span> Emergency Network</button>
+    <div class="side-note"><strong>How to use</strong><br>Choose a module, change the inputs and run the simulation. Results are illustrative educational models, not measurements from a real wireless network.</div>
+  </aside>
+
+  <main class="content">
+    <section class="module active" id="q1">
+      <div class="module-head"><div><p class="kicker">QUESTION 1 · 6 MARKS</p><h2>Wireless Network Architecture & Mobility</h2><p>Explore infrastructure components and observe how movement affects packet delivery, delay and handoff.</p></div><span class="module-number">Q1</span></div>
+      <div class="grid two">
+        <article class="panel">
+          <h3>Wireless network architecture</h3>
+          <div class="network-diagram" aria-label="Wireless network architecture diagram">
+            <div class="node mobile">Mobile Node<br><small>Phone / vehicle</small></div>
+            <div class="link-line"></div>
+            <div class="node ap">Access Point / Base Station</div>
+            <div class="link-line"></div>
+            <div class="node core">Core Network / Internet</div>
+            <div class="diagram-caption">Mobile node ⇄ wireless access ⇄ wired backbone ⇄ application/server</div>
+          </div>
+          <div class="mini-grid">
+            <div><b>Mobile node</b><small>Moves and exchanges data.</small></div>
+            <div><b>AP / Base station</b><small>Provides wireless attachment.</small></div>
+            <div><b>Backhaul</b><small>Connects access point to core.</small></div>
+            <div><b>Server</b><small>Hosts the application or service.</small></div>
+          </div>
+        </article>
+        <article class="panel">
+          <h3>Mobility scenario simulator</h3>
+          <label for="mobility">Mobility condition</label>
+          <select id="mobility"><option value="low">Low – pedestrian</option><option value="medium" selected>Medium – bicycle</option><option value="high">High – vehicle</option></select>
+          <label for="signal">Signal quality</label>
+          <input id="signal" type="range" min="20" max="100" value="75"><output id="signalOut">75%</output>
+          <label for="packets">Packets sent</label>
+          <input id="packets" type="number" min="10" max="500" value="100">
+          <button class="primary" id="runMobility">Run mobility test</button>
+          <div class="metrics" id="mobilityResults"><div><strong>—</strong><small>Delivered</small></div><div><strong>—</strong><small>Packet loss</small></div><div><strong>—</strong><small>Delay</small></div><div><strong>—</strong><small>Handoffs</small></div></div>
+          <p class="hint">Model assumption: faster movement and weaker signal increase interruption and packet loss.</p>
+        </article>
+      </div>
+      <article class="panel">
+        <h3>Mobility event sequence</h3>
+        <div class="steps"><span>1. Node connected to AP-1</span><i>→</i><span>2. Signal from AP-1 weakens</span><i>→</i><span>3. AP-2 selected</span><i>→</i><span>4. Handoff completed</span></div>
+      </article>
+    </section>
+
+    <section class="module" id="q2">
+      <div class="module-head"><div><p class="kicker">QUESTION 2 · 7 MARKS</p><h2>Mobile IP & Mobility Management</h2><p>Follow registration and packet delivery when a mobile node moves away from its home network.</p></div><span class="module-number">Q2</span></div>
+      <article class="panel">
+        <h3>Mobile IP architecture</h3>
+        <div class="mobileip-diagram">
+          <div class="ip-node"><b>Correspondent Node</b><small>Sends data to home address</small></div><div class="arrow">→</div>
+          <div class="ip-node home"><b>Home Agent</b><small>Maintains binding</small></div><div class="arrow">⇢ tunnel ⇢</div>
+          <div class="ip-node foreign"><b>Foreign Agent</b><small>Visited network</small></div><div class="arrow">→</div>
+          <div class="ip-node mobileip"><b>Mobile Node</b><small>Current location</small></div>
+        </div>
+        <div class="legend"><span><i class="dot home-dot"></i> Home network</span><span><i class="dot foreign-dot"></i> Foreign network</span><span>⇢ Encapsulated tunnel</span></div>
+      </article>
+      <div class="grid two">
+        <article class="panel">
+          <h3>Registration and packet-flow simulator</h3>
+          <label for="ipStep">Select operation</label>
+          <select id="ipStep"><option value="0">1. Agent discovery</option><option value="1">2. Care-of address obtained</option><option value="2">3. Registration request to Home Agent</option><option value="3">4. Registration reply accepted</option><option value="4">5. Home Agent tunnels packet</option><option value="5">6. Foreign Agent delivers packet</option></select>
+          <button class="primary" id="showIpStep">Show selected step</button>
+          <div class="step-output" id="ipOutput">The mobile node discovers mobility agents and detects that it is away from its home network.</div>
+        </article>
+        <article class="panel">
+          <h3>Mobility challenge explorer</h3>
+          <div class="challenge-list">
+            <details open><summary>Registration delay</summary><p>Time is required to discover an agent, obtain a care-of address and register the new location.</p></details>
+            <details><summary>Tunnelling overhead</summary><p>Encapsulation adds extra headers, increasing packet size and consuming bandwidth.</p></details>
+            <details><summary>Triangular routing</summary><p>Packets may travel through the Home Agent instead of taking the most direct route.</p></details>
+            <details><summary>Security and scalability</summary><p>Registration must be authenticated, and the Home Agent must handle many mobile nodes.</p></details>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="module" id="q3">
+      <div class="module-head"><div><p class="kicker">QUESTION 3 · 7 MARKS</p><h2>Cellular Networks vs Ad Hoc Networks</h2><p>Compare infrastructure-based communication with infrastructure-less, multi-hop communication.</p></div><span class="module-number">Q3</span></div>
+      <div class="grid two">
+        <article class="panel">
+          <h3>Cellular network</h3>
+          <div class="topology cellular"><div class="tower">BASE<br>STATION</div><div class="users"><span>●</span><span>●</span><span>●</span><span>●</span></div><p>Users communicate through a fixed base station.</p></div>
+        </article>
+        <article class="panel">
+          <h3>Ad hoc network (MANET)</h3>
+          <div class="topology adhoc"><div class="mesh"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span></div><p>Mobile nodes communicate directly or forward packets for others.</p></div>
+        </article>
+      </div>
+      <article class="panel">
+        <h3>Technical comparison</h3>
+        <div class="table-wrap"><table><thead><tr><th>Parameter</th><th>Cellular network</th><th>Ad hoc network</th></tr></thead><tbody>
+          <tr><td>Infrastructure</td><td>Fixed base stations and core</td><td>No fixed infrastructure required</td></tr>
+          <tr><td>Communication</td><td>Usually through base station</td><td>Direct or multi-hop between nodes</td></tr>
+          <tr><td>Routing</td><td>Managed by network infrastructure</td><td>Distributed routing among nodes</td></tr>
+          <tr><td>Topology</td><td>Planned cell structure</td><td>Dynamic topology</td></tr>
+          <tr><td>Handoff</td><td>Supported by cellular mobility procedures</td><td>Routes/links may need rediscovery</td></tr>
+          <tr><td>Failure handling</td><td>May depend on surviving infrastructure</td><td>Can reroute if alternate node paths exist</td></tr>
+          <tr><td>Applications</td><td>Public mobile broadband, voice</td><td>Disaster response, temporary teams</td></tr>
+        </tbody></table></div>
+        <div class="decision"><b>Engineering decision:</b> In a disaster area with unavailable fixed infrastructure, a MANET can provide local multi-hop communication. A hybrid design can reconnect to cellular or satellite backhaul when available.</div>
+      </article>
+    </section>
+
+    <section class="module" id="q4">
+      <div class="module-head"><div><p class="kicker">QUESTION 4 · 7 MARKS</p><h2>Applications of Mobile IP</h2><p>Design a mobile healthcare communication example and identify its mobility requirements.</p></div><span class="module-number">Q4</span></div>
+      <div class="grid two">
+        <article class="panel">
+          <h3>Example: ambulance telemetry</h3>
+          <div class="application-flow"><div class="flow-box">Ambulance<br><small>Mobile Node</small></div><div class="flow-arrow">⇄</div><div class="flow-box">Visited Network<br><small>Foreign Agent</small></div><div class="flow-arrow">⇄</div><div class="flow-box">Hospital<br><small>Correspondent Node</small></div></div>
+          <p class="muted">The ambulance sends patient vital signs and location updates while moving between coverage areas. Mobile IP can help preserve reachability through a stable home address and location registration.</p>
+        </article>
+        <article class="panel">
+          <h3>Application requirements</h3>
+          <ul class="check-list"><li>Low communication delay for urgent alerts</li><li>Reliable packet delivery and reconnection</li><li>Authentication and confidentiality of patient data</li><li>Continuous location and connectivity updates</li><li>Fallback communication when coverage is lost</li></ul>
+        </article>
+      </div>
+      <article class="panel">
+        <h3>Estimate application performance</h3>
+        <div class="grid three">
+          <div><label for="baseDelay">Base network delay (ms)</label><input type="number" id="baseDelay" value="45" min="1" max="1000"></div>
+          <div><label for="regDelay">Registration delay (ms)</label><input type="number" id="regDelay" value="120" min="0" max="5000"></div>
+          <div><label for="lossRate">Packet loss (%)</label><input type="number" id="lossRate" value="3" min="0" max="100"></div>
+        </div>
+        <button class="primary" id="calcApp">Calculate estimated impact</button>
+        <div class="metrics" id="appResults"><div><strong>—</strong><small>Delay</small></div><div><strong>—</strong><small>Packets delivered / 100</small></div><div><strong>—</strong><small>Assessment</small></div></div>
+      </article>
+    </section>
+
+    <section class="module" id="q5">
+      <div class="module-head"><div><p class="kicker">QUESTION 5 · 6 MARKS</p><h2>Proactive Routing – DSDV</h2><p>DSDV maintains routing information in advance using destination sequence numbers.</p></div><span class="module-number">Q5</span></div>
+      <div class="grid two">
+        <article class="panel">
+          <h3>Sample mobile topology</h3>
+          <div class="route-topology"><div class="route-node n1">A</div><div class="route-node n2">B</div><div class="route-node n3">C</div><div class="route-node n4">D</div><div class="route-node n5">E</div><svg viewBox="0 0 500 210" preserveAspectRatio="none"><line x1="55" y1="65" x2="170" y2="65"/><line x1="170" y1="65" x2="285" y2="65"/><line x1="285" y1="65" x2="400" y2="65"/><line x1="170" y1="65" x2="285" y2="155"/><line x1="285" y1="155" x2="400" y2="65"/></svg></div>
+          <div class="route-controls"><button class="secondary" id="topologyBefore">Before topology change</button><button class="primary" id="topologyAfter">Move node C</button></div>
+          <p id="topologyStatus" class="status-line">Current route: A → B → C → D</p>
+        </article>
+        <article class="panel">
+          <h3>Illustrative DSDV routing table</h3>
+          <div class="table-wrap"><table><thead><tr><th>Destination</th><th>Next hop</th><th>Hop count</th><th>Sequence no.</th></tr></thead><tbody id="dsdvTable"><tr><td>D</td><td>B</td><td>3</td><td>24</td></tr><tr><td>C</td><td>B</td><td>2</td><td>18</td></tr><tr><td>E</td><td>B</td><td>2</td><td>30</td></tr></tbody></table></div>
+          <p class="hint">Higher, fresh sequence numbers help identify newer routes and avoid stale routing information.</p>
+        </article>
+      </div>
+      <article class="panel">
+        <h3>DSDV behaviour</h3>
+        <div class="steps"><span>Periodic route updates</span><i>→</i><span>Sequence number comparison</span><i>→</i><span>Routing table refresh</span><i>→</i><span>Route ready when needed</span></div>
+        <p class="muted">Advantage: routes are available before data transmission. Limitation: periodic updates can create control overhead, especially when the topology changes frequently.</p>
+      </article>
+    </section>
+
+    <section class="module" id="q6">
+      <div class="module-head"><div><p class="kicker">QUESTION 6 · 7 MARKS</p><h2>Reactive Routing & Protocol Comparison</h2><p>Compare route discovery on demand (AODV) with table maintenance in advance (DSDV).</p></div><span class="module-number">Q6</span></div>
+      <article class="panel">
+        <h3>AODV route discovery sequence</h3>
+        <div class="steps"><span>Source broadcasts RREQ</span><i>→</i><span>Destination / route node receives</span><i>→</i><span>RREP returns</span><i>→</i><span>Data follows discovered route</span></div>
+        <div class="grid two">
+          <div><label for="nodes">Number of mobile nodes</label><input type="range" id="nodes" min="5" max="100" value="30"><output id="nodesOut">30 nodes</output></div>
+          <div><label for="change">Topology change frequency</label><select id="change"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+        </div>
+        <button class="primary" id="compareRouting">Compare protocols</button>
+        <div class="table-wrap"><table><thead><tr><th>Metric (illustrative)</th><th>DSDV</th><th>AODV</th></tr></thead><tbody id="routingResults"><tr><td>Initial route delay</td><td>Low (route pre-known)</td><td>Discovery required</td></tr><tr><td>Control overhead</td><td>Periodic updates</td><td>On-demand discovery / maintenance</td></tr><tr><td>Frequent topology changes</td><td>More table updates</td><td>Route rediscovery may increase</td></tr></tbody></table></div>
+        <div class="decision" id="routingDecision">Run the comparison to see how node count and mobility affect the illustrative metrics.</div>
+      </article>
+      <article class="panel">
+        <h3>Control message roles</h3>
+        <div class="mini-grid">
+          <div><b>RREQ</b><small>Route Request: searches for a path.</small></div>
+          <div><b>RREP</b><small>Route Reply: confirms a discovered path.</small></div>
+          <div><b>RERR</b><small>Route Error: reports a broken route.</small></div>
+          <div><b>DSDV update</b><small>Advertises routing table information and sequence numbers.</small></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="module" id="q7">
+      <div class="module-head"><div><p class="kicker">QUESTION 7 · 10 MARKS · DAY-4 DESIGN CHALLENGE</p><h2>Mobile Emergency Communication Network</h2><p>Build a collaborative design for ambulances, police, rescue teams and medical staff when fixed infrastructure is unavailable.</p></div><span class="module-number">Q7</span></div>
+      <article class="panel">
+        <h3>Proposed hybrid emergency architecture</h3>
+        <div class="emergency-diagram">
+          <div class="emergency-row"><div class="em-node">Ambulance</div><div class="em-node">Rescue team</div><div class="em-node">Police vehicle</div><div class="em-node">Medical team</div></div>
+          <div class="em-connector">↕  MANET multi-hop links  ↕</div>
+          <div class="em-core"><b>Ad hoc routing layer</b><small>AODV discovers routes when needed; alternate paths support recovery.</small></div>
+          <div class="em-connector">↕  Available gateway / backhaul  ↕</div>
+          <div class="em-gateway"><b>Gateway / Mobile IP connectivity</b><small>Home Agent · Foreign Agent / care-of address · Hospital server</small></div>
+        </div>
+        <p class="hint">When cellular infrastructure is unavailable, local MANET links can support nearby communication. A gateway can provide external connectivity when a usable backhaul becomes available.</p>
+      </article>
+      <div class="grid two">
+        <article class="panel">
+          <h3>Test network conditions</h3>
+          <label for="emNodes">Number of mobile nodes</label><input type="range" id="emNodes" min="5" max="80" value="25"><output id="emNodesOut">25 nodes</output>
+          <label for="emMobility">Mobility level</label><select id="emMobility"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+          <label for="emLinks">Available link reliability (%)</label><input type="range" id="emLinks" min="30" max="100" value="85"><output id="emLinksOut">85%</output>
+          <button class="primary" id="runEmergency">Run emergency network test</button>
+        </article>
+        <article class="panel">
+          <h3>Experimental validation results</h3>
+          <div class="metrics vertical" id="emResults"><div><strong>—</strong><small>Packet delivery</small></div><div><strong>—</strong><small>Average delay</small></div><div><strong>—</strong><small>Routing overhead</small></div><div><strong>—</strong><small>Connectivity status</small></div></div>
+          <p class="hint">Results are generated from a simplified model for comparing scenarios. Record multiple runs and explain assumptions in the report.</p>
+        </article>
+      </div>
+      <article class="panel">
+        <h3>Design justification checklist</h3>
+        <div class="check-grid">
+          <label><input type="checkbox"> Mobile nodes and wireless links identified</label>
+          <label><input type="checkbox"> Mobile IP roles and registration described</label>
+          <label><input type="checkbox"> Routing protocol selection justified</label>
+          <label><input type="checkbox"> Node and link failure handling explained</label>
+          <label><input type="checkbox"> Delay and packet delivery evaluated</label>
+          <label><input type="checkbox"> Limitations and fallback links discussed</label>
+        </div>
+      </article>
+    </section>
+
+    <footer><span>CO3 · Mobile Computing Network Lab</span><span>Educational simulation · Review assumptions before submission</span></footer>
+  </main>
+</div>
+<script src="co3_simulator.js"></script>
+</body>
+</html>
