@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CO2 Mobile Telecommunication Systems Simulator</title>
+  <link rel="stylesheet" href="co2_style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="eyebrow">MOBILE COMPUTING • ASSIGNMENT 2 • CO2</div>
+  <h1>Mobile Telecommunication Systems Simulator</h1>
+  <p>Explore mobile computing, multiple-access techniques, GSM concepts and engineering redesign through interactive experiments.</p>
+  <div class="hero-tags"><span>Q1–Q7</span><span>Interactive simulations</span><span>Experimental evidence</span></div>
+</header>
+
+<nav class="tabs" aria-label="Assignment questions">
+  <button class="tab active" data-target="q1">Q1 · Mobility</button>
+  <button class="tab" data-target="q2">Q2 · FDMA / TDMA</button>
+  <button class="tab" data-target="q3">Q3 · CDMA</button>
+  <button class="tab" data-target="q4">Q4 · OFDMA</button>
+  <button class="tab" data-target="q5">Q5 · SDMA</button>
+  <button class="tab" data-target="q6">Q6 · Selection</button>
+  <button class="tab" data-target="q7">Q7 · Redesign</button>
+</nav>
+
+<main>
+  <section id="q1" class="panel active">
+    <div class="section-heading"><div><span class="q-label">QUESTION 01</span><h2>Mobile communication or mobile computing?</h2></div><span class="mark">5 marks</span></div>
+    <p class="intro">Classify field-service devices and compare immediate transmission with store-and-forward delivery when the network is unreliable.</p>
+    <div class="card">
+      <h3>Classification criteria</h3>
+      <div class="criteria-grid">
+        <div><b>User mobility</b><small>Can the user move while using the service?</small></div>
+        <div><b>Wireless link</b><small>Does the device use a radio connection?</small></div>
+        <div><b>Disconnection tolerance</b><small>Can work continue offline?</small></div>
+        <div><b>Context awareness</b><small>Does location or situation affect the app?</small></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Case</th><th>Classification</th><th>Main focus</th><th>Reason</th></tr></thead><tbody>
+        <tr><td>Rugged tablet using cellular work orders</td><td>Mobile</td><td>Communication + computing</td><td>Moving user, wireless data and app processing</td></tr>
+        <tr><td>Laptop connected by Ethernet at different offices</td><td>Nomadic</td><td>Mobile computing</td><td>Location changes, but each connection is wired</td></tr>
+        <tr><td>Fixed wireless router at a substation</td><td>Fixed-wireless</td><td>Communication</td><td>Wireless access, but equipment is stationary</td></tr>
+        <tr><td>Push-to-talk handset</td><td>Mobile</td><td>Mobile communication</td><td>Voice exchange while moving</td></tr>
+        <tr><td>Offline meter-reading tablet</td><td>Mobile</td><td>Mobile computing</td><td>Stores work locally and synchronises later</td></tr>
+      </tbody></table></div>
+      <p class="note"><b>Additional ambiguous case:</b> a delivery driver's laptop connected to Wi-Fi only when parked. It is mobile in use, but the application must tolerate intermittent connectivity.</p>
+    </div>
+    <div class="card">
+      <h3>Store-and-forward experiment</h3>
+      <div class="controls">
+        <label>Number of meter updates<input id="q1count" type="number" min="100" max="10000" step="100" value="1000"></label>
+        <label>Link availability<select id="q1availability"><option value="0.9">90%</option><option value="0.6">60%</option><option value="0.3">30%</option></select></label>
+        <label>Average retry interval (minutes)<input id="q1retry" type="number" min="1" max="60" value="5"></label>
+      </div>
+      <button class="primary" id="runQ1">Run Q1 simulation</button>
+      <div id="q1results" class="results empty">Run the experiment to view the results.</div>
+      <p class="note">Model assumption: updates are generated at regular intervals. Immediate-send failures are counted as lost. Store-and-forward retries until delivered; delay is estimated from the retry interval and availability.</p>
+    </div>
+  </section>
+
+  <section id="q2" class="panel">
+    <div class="section-heading"><div><span class="q-label">QUESTION 02</span><h2>FDMA vs TDMA under different traffic</h2></div><span class="mark">6 marks</span></div>
+    <p class="intro">Both systems begin with 80 nominal channels. Change overhead and traffic to compare effective capacity and dedicated-channel utilisation.</p>
+    <div class="card">
+      <div class="controls">
+        <label>Traffic pattern<select id="q2pattern"><option value="voice">Continuous voice</option><option value="bursty">Bursty data · 10% duty</option><option value="mix">70% voice / 30% data</option><option value="short">Edge case · very short calls</option></select></label>
+        <label>FDMA guard-band loss (%)<input id="q2fdma" type="number" min="0" max="40" value="8"></label>
+        <label>TDMA control + guard loss (%)<input id="q2tdma" type="number" min="0" max="40" value="12"></label>
+        <label>Number of traffic requests<input id="q2requests" type="number" min="50" max="5000" value="800"></label>
+      </div>
+      <button class="primary" id="runQ2">Run FDMA / TDMA simulation</button>
+      <div id="q2results" class="results empty">Run the experiment to compare both access methods.</div>
+      <canvas id="q2chart" height="220"></canvas>
+      <p class="note">Assumption: the 2 MHz band and the assignment's 80 nominal channels are used as the baseline. Overhead percentages are user-adjustable assumptions, not standard-mandated values.</p>
+    </div>
+  </section>
+
+  <section id="q3" class="panel">
+    <div class="section-heading"><div><span class="q-label">QUESTION 03</span><h2>CDMA: spreading and near-far problem</h2></div><span class="mark">7 marks</span></div>
+    <p class="intro">A simplified DS-CDMA uplink experiment illustrates processing gain, code correlation and the effect of users transmitting at unequal powers.</p>
+    <div class="card">
+      <div class="controls">
+        <label>Spreading code length<select id="q3length"><option>8</option><option>16</option><option>64</option></select></label>
+        <label>Number of simultaneous users<input id="q3users" type="number" min="2" max="16" value="4"></label>
+        <label>Condition<select id="q3condition"><option value="orthogonal">Synchronous orthogonal codes</option><option value="random">Random non-orthogonal codes</option><option value="nearfar">Orthogonal codes · one user 10× power</option></select></label>
+        <label>Information bits per user<input id="q3bits" type="number" min="100" max="5000" step="100" value="1000"></label>
+      </div>
+      <button class="primary" id="runQ3">Run CDMA experiment</button>
+      <div id="q3results" class="results empty">Run the experiment to view bit errors and processing gain.</div>
+      <canvas id="q3chart" height="220"></canvas>
+      <p class="note">This is an educational chip-level model with seeded pseudo-random data and noise. Real CDMA performance also depends on synchronisation, channel estimation, coding and power control.</p>
+    </div>
+  </section>
+
+  <section id="q4" class="panel">
+    <div class="section-heading"><div><span class="q-label">QUESTION 04</span><h2>OFDMA subcarrier allocation</h2></div><span class="mark">6 marks</span></div>
+    <p class="intro">Eight users share 64 subcarriers. Compare fixed contiguous, round-robin interleaved and channel-aware allocation over 1,000 fading realisations.</p>
+    <div class="card">
+      <div class="controls">
+        <label>Minimum required rate per user<input id="q4minimum" type="number" min="0.1" max="20" step="0.1" value="2"></label>
+        <label>Number of fading realisations<input id="q4runs" type="number" min="100" max="5000" step="100" value="1000"></label>
+      </div>
+      <button class="primary" id="runQ4">Run OFDMA experiment</button>
+      <div id="q4results" class="results empty">Run the experiment to compare throughput and fairness.</div>
+      <canvas id="q4chart" height="250"></canvas>
+      <p class="note">Rate model: log₂(1 + channel gain). Generated fading values use a fixed seed so repeated runs are reproducible. Jain's fairness index ranges from 0 to 1.</p>
+    </div>
+  </section>
+
+  <section id="q5" class="panel">
+    <div class="section-heading"><div><span class="q-label">QUESTION 05</span><h2>SDMA with directional antennas</h2></div><span class="mark">6 marks</span></div>
+    <p class="intro">Calculate the normalised uniform linear array response and estimate how well a beam steered at user A suppresses user B at different angular separations.</p>
+    <div class="card">
+      <div class="controls">
+        <label>Array elements<select id="q5elements"><option>2</option><option>4</option><option selected>8</option><option>16</option></select></label>
+        <label>Required SIR threshold (dB)<input id="q5threshold" type="number" min="-10" max="30" value="10"></label>
+        <label>Steering angle for user A (degrees)<input id="q5steer" type="number" min="-60" max="60" value="0"></label>
+      </div>
+      <button class="primary" id="runQ5">Calculate SDMA pattern</button>
+      <div id="q5results" class="results empty">Run the experiment to find the minimum angular separation.</div>
+      <canvas id="q5chart" height="250"></canvas>
+      <p class="note">ULA assumptions: half-wavelength element spacing, broadside reference and ideal equal-amplitude weights. SIR here is an idealised beam-response ratio, not a full propagation model.</p>
+    </div>
+  </section>
+
+  <section id="q6" class="panel">
+    <div class="section-heading"><div><span class="q-label">QUESTION 06</span><h2>Choose the right multiple-access technique</h2></div><span class="mark">7 marks</span></div>
+    <p class="intro">Use a weighted decision matrix to compare FDMA, TDMA, CDMA, OFDMA and SDMA for four deployment scenarios. Adjust the weights and observe whether the winner changes.</p>
+    <div class="card">
+      <h3>Criteria weights (%)</h3>
+      <div class="weight-grid">
+        <label>Spectral efficiency<input id="wEfficiency" type="number" min="0" max="100" value="25"></label>
+        <label>Interference handling<input id="wInterference" type="number" min="0" max="100" value="20"></label>
+        <label>Implementation simplicity<input id="wSimplicity" type="number" min="0" max="100" value="15"></label>
+        <label>Bursty traffic support<input id="wBursty" type="number" min="0" max="100" value="20"></label>
+        <label>Scalability<input id="wScale" type="number" min="0" max="100" value="20"></label>
+      </div>
+      <button class="primary" id="runQ6">Calculate decision matrix</button>
+      <div id="q6results" class="results empty">Calculate the weighted scores for each deployment.</div>
+      <p class="note">Scores are illustrative engineering ratings from 1 (weak) to 5 (strong). Replace them with ratings justified by your own Q2–Q5 experimental evidence in the final report.</p>
+    </div>
+  </section>
+
+  <section id="q7" class="panel">
+    <div class="section-heading"><div><span class="q-label">QUESTION 07 · DAY 4</span><h2>Diagnose, redesign and validate</h2></div><span class="mark">13 marks</span></div>
+    <p class="intro">Example redesign: dedicated channels can remain idle when traffic is bursty. Compare a fixed dedicated allocation with a pooled on-demand allocation under the same offered traffic.</p>
+    <div class="card">
+      <div class="controls">
+        <label>Number of users<input id="q7users" type="number" min="20" max="2000" value="500"></label>
+        <label>Average activity probability (%)<input id="q7activity" type="number" min="1" max="100" value="10"></label>
+        <label>Available channel pool<input id="q7channels" type="number" min="5" max="200" value="80"></label>
+      </div>
+      <button class="primary" id="runQ7">Validate redesign</button>
+      <div id="q7results" class="results empty">Run the comparison to measure idle and blocked resources.</div>
+      <canvas id="q7chart" height="220"></canvas>
+      <div class="design-box">
+        <h3>Redesign logic</h3>
+        <ol>
+          <li><b>Diagnose:</b> a dedicated channel is reserved even when its user is inactive.</li>
+          <li><b>Objective:</b> reduce idle channel-time while keeping blocking low.</li>
+          <li><b>Revised strategy:</b> allocate a channel only when a user has data to send; release it after transmission.</li>
+          <li><b>Trade-off:</b> the pooled system needs scheduling and control signalling.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="card final-notes">
+    <h2>Experiment record</h2>
+    <p>Use the results as a starting point for your assignment. Record assumptions, predictions, parameter values and measured outcomes in your report. The assignment requires raw CSV data, graphs, fixed random seeds and cited standards parameters.</p>
+    <button class="secondary" id="downloadSummary">Download experiment summary (CSV)</button>
+    <p class="small">Important: this educational prototype models the requested concepts with simplified assumptions. It is not a standards-compliant GSM/network simulator. Verify each model, explain the assumptions and be prepared to defend the code in your viva.</p>
+  </section>
+</main>
+<footer>CO2 Mobile Telecommunication Systems Simulator · Educational prototype</footer>
+<script src="co2_simulator.js"></script>
+</body>
+</html>
