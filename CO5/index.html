@@ -1,0 +1,646 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CO5 - Mobile Computing Assignment 5</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <div>
+        <h2>MOBILE COMPUTING</h2>
+        <p>ITA03-MP | ASSIGNMENT 5 | CO5</p>
+    </div>
+    <span class="header-tag">50 MARKS</span>
+</header>
+
+<section class="hero">
+    <p>ANDROID APPLICATION FEATURES & PERFORMANCE ENGINEERING</p>
+    <h1>Design. Measure.<br><span>Optimise.</span></h1>
+    <p class="hero-description">
+        An interactive engineering workspace to explore background services,
+        secure synchronisation, performance optimisation and mobile application design.
+    </p>
+    <div class="hero-tags">
+        <span>PART A · DESIGN & ANALYSIS</span>
+        <span>PART B · IMPLEMENTATION & INVESTIGATION</span>
+    </div>
+</section>
+
+<nav class="navigation">
+    <button class="nav-btn active" data-page="home">Overview</button>
+    <button class="nav-btn" data-page="partA">Part A - Design</button>
+    <button class="nav-btn" data-page="partB">Part B - Lab</button>
+    <button class="nav-btn" data-page="evidence">Evidence Log</button>
+</nav>
+
+<main>
+
+<!-- OVERVIEW -->
+<section id="home" class="page active">
+    <h2>CO5 Engineering Console</h2>
+    <p class="subtitle">Mobile Application Features and Performance Engineering</p>
+
+    <div class="cards">
+        <div class="card">
+            <h3>05</h3>
+            <p>Design Tasks</p>
+            <small>Part A - 25 Marks</small>
+        </div>
+        <div class="card">
+            <h3>04</h3>
+            <p>Implementation Tasks</p>
+            <small>Part B - 25 Marks</small>
+        </div>
+        <div class="card">
+            <h3>06</h3>
+            <p>Engineering Stages</p>
+            <small>Understand to Interpret</small>
+        </div>
+        <div class="card">
+            <h3>16 ms</h3>
+            <p>Frame Time Target</p>
+            <small>Smooth Scrolling</small>
+        </div>
+    </div>
+
+    <div class="content-box">
+        <h3>Engineering Workflow</h3>
+        <div class="workflow">
+            <span>Understand</span>
+            <span>→ Design</span>
+            <span>→ Check</span>
+            <span>→ Implement</span>
+            <span>→ Measure</span>
+            <span>→ Analyse</span>
+        </div>
+        <p>
+            The objective is to develop mobile applications that remain efficient,
+            secure, usable and scalable under battery, memory, network and device
+            constraints.
+        </p>
+    </div>
+
+    <div class="content-box">
+        <h3>Assignment Components</h3>
+        <ul>
+            <li>Constraint-aware Android Intent and Service Architecture</li>
+            <li>Incremental and secure data synchronisation</li>
+            <li>Mobile background-work design patterns</li>
+            <li>Local, cloud and hybrid processing analysis</li>
+            <li>UI and graphics performance optimisation</li>
+            <li>Instrumented background-work scheduler</li>
+            <li>Adversarial workload investigation</li>
+            <li>Exact versus approximate UI optimisation</li>
+            <li>Multimedia encoding strategy</li>
+        </ul>
+    </div>
+</section>
+
+<!-- PART A -->
+<section id="partA" class="page">
+    <h2>Part A - Design & Architectural Reasoning</h2>
+    <p class="subtitle">25 Marks | Language-independent design</p>
+
+    <div class="task-buttons">
+        <button class="task-btn active" data-task="A1">A1</button>
+        <button class="task-btn" data-task="A2">A2</button>
+        <button class="task-btn" data-task="A3">A3</button>
+        <button class="task-btn" data-task="A4">A4</button>
+        <button class="task-btn" data-task="A5">A5</button>
+    </div>
+
+    <div id="A1" class="task-content active">
+        <h3>A1 - Constraint-Aware Intent & Service Architecture</h3>
+        <p class="mark">7 Marks</p>
+
+        <div class="content-box">
+            <h4>Problem Model</h4>
+            <p><b>Input:</b> Sensor events, network state, battery level, user preferences and permissions.</p>
+            <p><b>Output:</b> Uploaded records and critical-event notifications.</p>
+            <p><b>Decision:</b> Collect, upload, defer, retry, notify or cancel.</p>
+            <p><b>Constraints:</b> Battery, Doze mode, permission, encryption and connectivity.</p>
+            <p><b>Goal:</b> Upload valid data securely while maintaining application responsiveness.</p>
+        </div>
+
+        <div class="content-box">
+            <h4>Runtime State</h4>
+            <ul>
+                <li>Pending work ID and record ID.</li>
+                <li>Task status: queued, running, deferred or completed.</li>
+                <li>Retry count and next execution time.</li>
+                <li>Permission and authentication status.</li>
+                <li>Battery and network state.</li>
+                <li>Encryption and upload checkpoint status.</li>
+            </ul>
+        </div>
+
+        <div class="content-box">
+            <h4>Feasibility Conditions</h4>
+            <p><b>Execute:</b> Permission is granted, data is encrypted and constraints are satisfied.</p>
+            <p><b>Defer:</b> Network is unavailable, battery is low or Doze blocks non-critical work.</p>
+            <p><b>Reject:</b> Data is invalid, unencrypted or unauthorised.</p>
+            <p><b>Cancel:</b> User logs out or withdraws permission.</p>
+        </div>
+
+        <div class="content-box">
+            <h4>Architectural Pseudocode</h4>
+            <pre>
+PROCEDURE SCHEDULE_HEALTH_WORK(state)
+
+WHILE pendingQueue is not empty
+
+    work = SELECT_NEXT_WORK()
+
+    candidate = CREATE_EXPLICIT_INTENT(work)
+
+    IF permission is denied
+        REJECT(work)
+        CONTINUE
+    END IF
+
+    IF user is not authenticated
+        CANCEL(work)
+        CONTINUE
+    END IF
+
+    IF data is not encrypted
+        ENCRYPT_AND_VALIDATE(work)
+    END IF
+
+    IF encryption fails
+        REJECT(work)
+        CONTINUE
+    END IF
+
+    IF device is in DOZE AND work is not critical
+        DEFER(work)
+        CONTINUE
+    END IF
+
+    IF network is unavailable OR battery is low
+        DEFER(work)
+        CONTINUE
+    END IF
+
+    ENQUEUE_UNIQUE_WORK(candidate)
+
+    result = EXECUTE(work)
+
+    IF result = SUCCESS
+        MARK_COMPLETED(work)
+        UPDATE_CHECKPOINT(work)
+
+    ELSE IF result = RETRYABLE_FAILURE
+        SAVE_CHECKPOINT(work)
+        SCHEDULE_RETRY(work)
+
+    ELSE
+        ROLLBACK(work)
+        CANCEL(work)
+    END IF
+
+END WHILE
+
+RETURN FINAL_STATUS
+
+END PROCEDURE
+            </pre>
+        </div>
+
+        <div class="content-box">
+            <h4>Five-Event Execution Trace</h4>
+            <table>
+                <tr><th>Event</th><th>Decision</th><th>Result</th></tr>
+                <tr><td>Sensor reading</td><td>Permission checked</td><td>Data stored</td></tr>
+                <tr><td>Network lost</td><td>Network unavailable</td><td>Upload deferred</td></tr>
+                <tr><td>Doze begins</td><td>Non-critical task</td><td>Work postponed</td></tr>
+                <tr><td>Critical alert</td><td>Priority checked</td><td>Notification sent</td></tr>
+                <tr><td>User logout</td><td>Authentication revoked</td><td>Pending work cancelled</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="A2" class="task-content">
+        <h3>A2 - Safe Data Synchronisation</h3>
+        <p class="mark">5 Marks</p>
+
+        <div class="content-box">
+            <h4>Problems with Naive Synchronisation</h4>
+            <ul>
+                <li>Uploads every record without checking priority.</li>
+                <li>Repeated network failures waste battery.</li>
+                <li>Large files consume unnecessary bandwidth.</li>
+                <li>Conflicting records are not identified.</li>
+                <li>Sensitive data may be exposed without encryption.</li>
+            </ul>
+        </div>
+
+        <div class="content-box">
+            <h4>Incremental Synchronisation Pseudocode</h4>
+            <pre>
+PROCEDURE SAFE_SYNC(records, environment)
+
+syncSet = EMPTY
+
+FOR EACH record IN records
+
+    IF record is deleted
+        DISCARD_OR_SEND_TOMBSTONE(record)
+        CONTINUE
+    END IF
+
+    IF record is not encrypted
+        REJECT(record)
+        CONTINUE
+    END IF
+
+    IF record has version conflict
+        RESOLVE_CONFLICT(record)
+        CONTINUE
+    END IF
+
+    IF network quality is insufficient
+        DEFER(record)
+        CONTINUE
+    END IF
+
+    IF battery is low AND record is not critical
+        DEFER(record)
+        CONTINUE
+    END IF
+
+    ADD record TO syncSet
+
+END FOR
+
+UPLOAD(syncSet)
+
+END PROCEDURE
+            </pre>
+        </div>
+
+        <div class="content-box">
+            <h4>Five-Record Pruning Example</h4>
+            <table>
+                <tr><th>Record</th><th>Priority</th><th>Size</th><th>Security</th><th>Decision</th></tr>
+                <tr><td>R1 Alert</td><td>Critical</td><td>12 KB</td><td>Encrypted</td><td>Upload</td></tr>
+                <tr><td>R2 Profile</td><td>Low</td><td>2 MB</td><td>Encrypted</td><td>Defer</td></tr>
+                <tr><td>R3 Token</td><td>High</td><td>4 KB</td><td>Not encrypted</td><td>Reject</td></tr>
+                <tr><td>R4 Activity</td><td>Medium</td><td>80 KB</td><td>Encrypted</td><td>Defer</td></tr>
+                <tr><td>R5 Old version</td><td>Medium</td><td>30 KB</td><td>Encrypted</td><td>Resolve conflict</td></tr>
+            </table>
+            <p>R3 is rejected before upload because its contents are not encrypted. Uploading it would violate the security condition.</p>
+        </div>
+
+        <div class="content-box">
+            <h4>Offline-First Challenge</h4>
+            <p>Under eventual consistency, temporarily unavailable records must be preserved locally. Permanent deletion because of poor connectivity is no longer valid. The system should use retries, durable storage and conflict resolution.</p>
+        </div>
+    </div>
+
+    <div id="A3" class="task-content">
+        <h3>A3 - Mobile Background Design Pattern</h3>
+        <p class="mark">5 Marks</p>
+
+        <div class="content-box">
+            <h4>Design Comparison</h4>
+            <table>
+                <tr><th>Component</th><th>Sensor Collection</th><th>Data Sync</th><th>Push Notification</th></tr>
+                <tr><td>State</td><td>Sensor status</td><td>Pending records</td><td>Token and status</td></tr>
+                <tr><td>Decision</td><td>Collect now/later</td><td>Upload/defer</td><td>Deliver/retry</td></tr>
+                <tr><td>Candidate</td><td>Worker/Service</td><td>Upload worker</td><td>Messaging service</td></tr>
+                <tr><td>Constraint</td><td>Permission/battery</td><td>Network/security</td><td>Token/consent</td></tr>
+                <tr><td>Goal</td><td>Store sample</td><td>Sync data</td><td>Notify user</td></tr>
+                <tr><td>Undo</td><td>Stop sensor</td><td>Rollback upload</td><td>Cancel notification</td></tr>
+            </table>
+        </div>
+
+        <div class="content-box">
+            <h4>Generic Background Framework</h4>
+            <pre>
+PROCEDURE SCHEDULE_OR_EXECUTE(state)
+
+    UPDATE_ENVIRONMENT(state)
+
+    work = SELECT_NEXT_CANDIDATE(state.queue)
+
+    IF work does not exist
+        RETURN IDLE
+    END IF
+
+    IF NOT AUTHORIZED(work)
+        REJECT_AND_CLEANUP(work)
+        RETURN
+    END IF
+
+    IF NOT FEASIBLE(work)
+        DEFER_WITH_CHECKPOINT(work)
+        RETURN
+    END IF
+
+    SAVE_PREVIOUS_STATE(work)
+
+    result = EXECUTE(work)
+
+    IF result = SUCCESS
+        COMMIT(work)
+
+    ELSE IF result = RETRYABLE
+        RESTORE_CHECKPOINT(work)
+        SCHEDULE_RETRY(work)
+
+    ELSE
+        ROLLBACK(work)
+        RELEASE_RESOURCES(work)
+    END IF
+
+END PROCEDURE
+            </pre>
+        </div>
+
+        <div class="content-box">
+            <h4>Role of Undo and Cancellation</h4>
+            <p>Undo restores the previous valid state after a failure. For example, if an upload is cancelled halfway, the application should remove incomplete temporary data and preserve the original local record. Otherwise, data corruption or duplication may occur.</p>
+        </div>
+    </div>
+
+    <div id="A4" class="task-content">
+        <h3>A4 - Local vs Cloud vs Hybrid Processing</h3>
+        <p class="mark">4 Marks</p>
+
+        <div class="content-box">
+            <table>
+                <tr><th>Problem</th><th>Solution</th><th>Verification</th><th>Resource Class</th></tr>
+                <tr><td>Image classification</td><td>Predicted class</td><td>Compare with labelled data</td><td>On-device feasible</td></tr>
+                <tr><td>Speech recognition</td><td>Text transcript</td><td>Word error rate</td><td>Network-bound</td></tr>
+                <tr><td>P2P file sharing</td><td>Verified file transfer</td><td>Hash comparison</td><td>Hybrid required</td></tr>
+                <tr><td>Encrypted messaging</td><td>Secure message delivery</td><td>Security testing</td><td>Security-critical</td></tr>
+                <tr><td>Multiplayer game</td><td>Synchronised game state</td><td>Latency and jitter</td><td>Network-bound</td></tr>
+                <tr><td>Offline maps</td><td>Rendered map tiles</td><td>Visual comparison</td><td>Hybrid required</td></tr>
+            </table>
+        </div>
+
+        <div class="content-box">
+            <h4>Inquiry</h4>
+            <p>Performance is not only about speed. It also includes latency, memory, battery usage, network traffic, reliability and frame deadlines.</p>
+            <p>Local processing improves offline availability and can protect privacy, but consumes device resources. Cloud processing provides greater computing capacity but depends on connectivity, introduces network latency and requires secure data transfer.</p>
+        </div>
+    </div>
+
+    <div id="A5" class="task-content">
+        <h3>A5 - UI Performance and Approximation</h3>
+        <p class="mark">4 Marks</p>
+
+        <div class="content-box">
+            <h4>Exact Optimisation</h4>
+            <p>Exact search examines every combination of decoding quality, cache size and prefetch distance. It selects the configuration with the lowest cost while satisfying the frame-time target.</p>
+            <p>As the number of feed items, device types and configuration levels increases, the search space grows rapidly.</p>
+        </div>
+
+        <div class="content-box">
+            <h4>Adaptive Heuristic Pseudocode</h4>
+            <pre>
+INITIALISE quality, cacheSize, prefetchWindow
+
+REPEAT
+
+    metrics = MEASURE(frameTime, battery, memory)
+
+    IF frameTime > 16 OR memory is HIGH
+        REDUCE quality
+        EVICT old cache items
+        REDUCE prefetchWindow
+
+    ELSE IF frameTime < 12 AND battery > 40
+        INCREASE quality carefully
+        INCREASE prefetchWindow
+    END IF
+
+    APPLY_PARAMETERS()
+    UPDATE_STATE()
+
+UNTIL parameters remain stable
+
+RETURN selected configuration
+            </pre>
+        </div>
+
+        <div class="content-box">
+            <h4>What Is Sacrificed?</h4>
+            <p>A heuristic can quickly find a feasible smooth-scrolling configuration. However, it does not prove that the selected parameters minimise total energy. It may find a local solution instead of the global optimum.</p>
+        </div>
+    </div>
+</section>
+
+<!-- PART B -->
+<section id="partB" class="page">
+    <h2>Part B - Implementation & Computational Investigation</h2>
+    <p class="subtitle">25 Marks | Interactive browser-based simulations</p>
+
+    <div class="task-buttons">
+        <button class="lab-btn active" data-lab="B1">B1</button>
+        <button class="lab-btn" data-lab="B2">B2</button>
+        <button class="lab-btn" data-lab="B3">B3</button>
+        <button class="lab-btn" data-lab="B4">B4</button>
+    </div>
+
+    <div id="B1" class="lab-content active">
+        <h3>B1 - Background Work Scheduler</h3>
+        <p class="mark">7 Marks</p>
+        <p>Choose the device conditions and compare FIFO scheduling with priority-based scheduling.</p>
+
+        <div class="content-box">
+            <label>Battery Level: <span id="batteryValue">65%</span></label>
+            <input type="range" id="battery" min="5" max="100" value="65">
+
+            <label>Network Quality</label>
+            <select id="network">
+                <option value="good">Good</option>
+                <option value="weak">Weak</option>
+                <option value="offline">Offline</option>
+            </select>
+
+            <label><input type="checkbox" id="doze"> Doze Mode Enabled</label>
+            <label><input type="checkbox" id="permission" checked> Permission Granted</label>
+
+            <div class="button-row">
+                <button id="fifoBtn">Run FIFO</button>
+                <button id="priorityBtn">Run Priority Scheduler</button>
+                <button id="resetBtn" class="reset">Reset</button>
+            </div>
+        </div>
+
+        <div class="cards metrics" id="schedulerMetrics">
+            <div class="card"><h3>0</h3><p>Enqueued</p></div>
+            <div class="card"><h3>0</h3><p>Deferred / Cancelled</p></div>
+            <div class="card"><h3>0</h3><p>Successful</p></div>
+            <div class="card"><h3>0</h3><p>Peak Workers</p></div>
+        </div>
+
+        <div class="content-box">
+            <h4>Work Item Results</h4>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Work Item</th><th>Priority</th><th>Encrypted</th><th>Result</th></tr>
+                    </thead>
+                    <tbody id="schedulerTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-box">
+            <h4>Execution Log</h4>
+            <pre id="schedulerLog">Run a scheduling strategy to view results.</pre>
+        </div>
+    </div>
+
+    <div id="B2" class="lab-content">
+        <h3>B2 - Adversarial Workload Investigation</h3>
+        <p class="mark">5 Marks</p>
+
+        <div class="two-column">
+            <div class="content-box">
+                <h4>Workload A - Friendly</h4>
+                <p>Small encrypted records, good network and sufficient battery.</p>
+                <button id="workABtn">Run Workload A</button>
+            </div>
+            <div class="content-box">
+                <h4>Workload B - Adversarial</h4>
+                <p>Large records, weak network, low battery and security problems.</p>
+                <button id="workBBtn">Run Workload B</button>
+            </div>
+        </div>
+
+        <div class="cards metrics" id="workloadMetrics">
+            <div class="card"><h3>--</h3><p>Processed</p></div>
+            <div class="card"><h3>--</h3><p>Deferred</p></div>
+            <div class="card"><h3>--</h3><p>Delivered</p></div>
+            <div class="card"><h3>--</h3><p>Rejected</p></div>
+        </div>
+
+        <div class="content-box">
+            <h4>Workload Analysis</h4>
+            <pre id="workloadLog">Choose a workload to begin.</pre>
+        </div>
+    </div>
+
+    <div id="B3" class="lab-content">
+        <h3>B3 - Exact vs Approximate UI Optimisation</h3>
+        <p class="mark">8 Marks</p>
+
+        <div class="content-box">
+            <label>Number of Feed Items: <span id="feedValue">8</span></label>
+            <input type="range" id="feedItems" min="4" max="40" value="8">
+
+            <label>Quality Levels</label>
+            <select id="qualityLevels">
+                <option value="3">3 Levels</option>
+                <option value="4">4 Levels</option>
+                <option value="5">5 Levels</option>
+            </select>
+
+            <label>Battery Level: <span id="feedBatteryValue">70%</span></label>
+            <input type="range" id="feedBattery" min="10" max="100" value="70">
+
+            <div class="button-row">
+                <button id="compareBtn">Compare Algorithms</button>
+                <button id="counterBtn">Load Counter-example</button>
+            </div>
+        </div>
+
+        <div class="cards metrics" id="feedMetrics">
+            <div class="card"><h3>--</h3><p>Exact Cost</p></div>
+            <div class="card"><h3>--</h3><p>Adaptive Cost</p></div>
+            <div class="card"><h3>--</h3><p>Configurations</p></div>
+            <div class="card"><h3>--</h3><p>Parameter Changes</p></div>
+        </div>
+
+        <div class="content-box">
+            <h4>Optimisation Results</h4>
+            <pre id="feedLog">Run the comparison to view the results.</pre>
+        </div>
+    </div>
+
+    <div id="B4" class="lab-content">
+        <h3>B4 - Multimedia Framework Selection</h3>
+        <p class="mark">5 Marks</p>
+
+        <div class="content-box">
+            <label>Device Profile</label>
+            <select id="device">
+                <option value="low">Low-end - 2 GB RAM</option>
+                <option value="mid" selected>Mid-range - 6 GB RAM</option>
+                <option value="high">Flagship - 12 GB RAM</option>
+            </select>
+
+            <label>Battery Level: <span id="videoBatteryValue">55%</span></label>
+            <input type="range" id="videoBattery" min="5" max="100" value="55">
+
+            <label>Network</label>
+            <select id="videoNetwork">
+                <option value="poor">Poor - 0.8 Mbps</option>
+                <option value="moderate" selected>Moderate - 4 Mbps</option>
+                <option value="fast">Fast - 15 Mbps</option>
+            </select>
+
+            <button id="videoBtn">Choose Encoding Strategy</button>
+        </div>
+
+        <div class="content-box" id="videoResult">
+            <h4>Selected Encoding Parameters</h4>
+            <p>Run the strategy to view the selected resolution, bitrate and estimated energy.</p>
+        </div>
+
+        <div class="content-box">
+            <h4>Production Engineering Decision</h4>
+            <p>Exhaustive search is expensive when thousands of devices and many encoding combinations are involved. A practical heuristic quickly selects a feasible resolution and bitrate based on device capability, battery and network speed.</p>
+            <p>The heuristic does not guarantee global optimality. Engineers should monitor upload completion, energy usage, thermal throttling, video quality and failure rate before production deployment.</p>
+        </div>
+    </div>
+
+    <div class="notice">
+        Note: These are browser-based simulations. They do not measure actual Android device battery consumption or WorkManager execution. Add real Android Studio or physical-device evidence separately if required by your instructor.
+    </div>
+</section>
+
+<!-- EVIDENCE -->
+<section id="evidence" class="page">
+    <h2>Evidence Log</h2>
+    <p class="subtitle">Record your experiment results and observations.</p>
+
+    <div class="content-box">
+        <label>Experiment Name</label>
+        <input type="text" id="experimentName" placeholder="Example: B1 Priority Scheduler">
+
+        <label>Test Conditions</label>
+        <input type="text" id="experimentConditions" placeholder="Battery, network, Doze, permissions">
+
+        <label>Observed Results and Interpretation</label>
+        <textarea id="experimentResult" rows="5" placeholder="Enter measurements, results and observations"></textarea>
+
+        <div class="button-row">
+            <button id="addEvidenceBtn">Add Evidence</button>
+            <button id="exportBtn" class="reset">Export CSV</button>
+        </div>
+
+        <div id="evidenceList">
+            <p>No evidence entries yet.</p>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<footer>
+    <p>ITA03-MP | MOBILE COMPUTING | CO5</p>
+    <p>Android Application Features & Performance Engineering</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
