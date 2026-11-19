@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CellPlan | University Township Network Planner</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">Cell<span>Plan</span> <span style="font-size:10px;color:#9fb1cb">LAB</span></div>
+  <div class="subbrand">RADIO NETWORK PLANNING SUITE</div>
+  <div class="navlabel">WORKSPACE</div>
+  <nav class="nav">
+    <button class="active" data-view="overview"><b>01</b> Overview</button>
+    <button data-view="strategies"><b>02</b> Strategies</button>
+    <button data-view="capacity"><b>03</b> Capacity & SIR</button>
+    <button data-view="scaling"><b>04</b> Scaling & Split</button>
+    <button data-view="event"><b>05</b> Event challenge</button>
+    <button data-view="simulation"><b>06</b> Simulation</button>
+  </nav>
+  <div class="sidebar-note">University Township<br>12 km² planning area<br><br>Model: hexagonal cells · Erlang-B · co-channel SIR</div>
+</aside>
+<main class="main">
+<header class="topbar"><div><div class="eyebrow">Network planning / Decision support</div><h1 id="pageTitle">Township network overview</h1></div><div class="status">● MODEL READY</div></header>
+
+<section class="view active" id="overview">
+  <div class="grid metrics">
+    <div class="card"><div class="metric-label">Planning area</div><div class="metric-value">12 km²</div><div class="metric-foot">University township footprint</div></div>
+    <div class="card"><div class="metric-label">Available duplex channels</div><div class="metric-value">336</div><div class="metric-foot">Fixed spectrum allocation</div></div>
+    <div class="card"><div class="metric-label">Busy-hour traffic / user</div><div class="metric-value">0.025 E</div><div class="metric-foot">Base demand assumption</div></div>
+    <div class="card"><div class="metric-label">Target blocking</div><div class="metric-value">≤ 2%</div><div class="metric-foot">Erlang-B grade of service</div></div>
+  </div>
+  <div class="grid two">
+    <div class="card"><h3 class="section-title">Planning assumptions</h3><p class="section-sub">Change the inputs and recompute the network model.</p>
+      <div class="field-grid">
+        <div class="field"><label>Subscribers</label><select id="subs"><option>1000</option><option selected>10000</option><option>20000</option><option>100000</option><option>150000</option></select></div>
+        <div class="field"><label>Path-loss exponent (n)</label><select id="path"><option value="2.5">2.5 · open campus</option><option value="3">3.0 · mixed</option><option value="3.5" selected>3.5 · suburban mix</option><option value="4">4.0 · dense built-up</option></select></div>
+        <div class="field"><label>Minimum SIR threshold</label><select id="sirTarget"><option value="12" selected>12 dB · digital-style</option><option value="18">18 dB · analogue-style</option></select></div>
+        <div class="field"><label>Cell radius R (km)</label><input id="radius" type="number" min=".1" max="3" step=".1" value="0.7"></div>
+        <div class="field"><label>Cluster size N</label><select id="cluster"><option>3</option><option>4</option><option selected>7</option><option>9</option><option>12</option><option>13</option></select></div>
+        <div class="field"><label>Sectoring</label><select id="sector"><option value="1">Omnidirectional</option><option value="3" selected>120° · 3 sectors</option><option value="6">60° · 6 sectors</option></select></div>
+      </div>
+      <div class="btn-row"><button class="btn" onclick="calculate()">Recalculate network</button><button class="btn secondary" onclick="resetInputs()">Reset defaults</button></div>
+    </div>
+    <div class="card"><h3 class="section-title">Recommended planning direction</h3><p class="section-sub">Initial decision based on fixed spectrum and non-uniform growth.</p>
+      <div class="recommend"><strong>Recommended baseline: sectorised macro layer + selective microcell splitting.</strong><br>Use a conservative reuse pattern that satisfies the SIR target, then add small cells only in high-demand hotspots. Dynamic channel borrowing can smooth local peaks where interference permits.</div>
+      <div style="margin-top:15px" class="result-grid">
+        <div class="result"><small>Estimated cells</small><strong id="ovCells">24</strong></div>
+        <div class="result"><small>Reuse distance</small><strong id="ovD">3.21 km</strong></div>
+        <div class="result"><small>Approx. SIR</small><strong id="ovSir">18.0 dB</strong></div>
+      </div>
+      <div class="callout">Planning caveat: this is a first-pass analytical model. Real deployment needs drive tests, building/clutter data, antenna patterns, frequency coordination and measured traffic maps.</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3 class="section-title">Demand growth horizon</h3><p class="section-sub">Forecast busy-hour offered traffic using 0.025 Erlang per subscriber.</p><div class="chartbox"><canvas id="growthChart"></canvas></div></div>
+</section>
+
+<section class="view" id="strategies">
+  <div class="card"><h3 class="section-title">Three distinct frequency-planning strategies</h3><p class="section-sub">Compare how each strategy shares the same 336 duplex channels.</p>
+    <div class="grid three">
+      <div class="card" style="box-shadow:none;background:#f8faff"><span class="tag">STRATEGY A</span><h3>Fixed cluster reuse</h3><p class="muted">Partition channels into N groups. Repeat the same group only after the reuse distance D = R√(3N).</p><p><b>Principle:</b> spatial reuse</p><p><b>Access:</b> FDMA/TDMA channel groups; separate control channels.</p><div class="formula">for each valid (i,j):<br>N = i² + ij + j²<br>Q = √(3N)<br>assign group[c] = c mod N<br>check SIR ≥ threshold</div></div>
+      <div class="card" style="box-shadow:none;background:#f8faff"><span class="tag">STRATEGY B</span><h3>Sectorised reuse</h3><p class="muted">Split each site into 3 or 6 directional sectors. Antenna patterns reduce the dominant co-channel interferers.</p><p><b>Principle:</b> spatial filtering</p><p><b>Access:</b> FDMA/TDMA or OFDMA resources per sector.</p><div class="formula">for each site:<br>create S directional sectors<br>assign sector channel plan<br>evaluate front/back leakage<br>retain plan if SIR ≥ target</div></div>
+      <div class="card" style="box-shadow:none;background:#f8faff"><span class="tag">STRATEGY C</span><h3>Hierarchical + borrowing</h3><p class="muted">Keep macro coverage, add microcells in hotspots and borrow idle channels from neighbours subject to interference checks.</p><p><b>Principle:</b> trunking + spatial reuse</p><p><b>Access:</b> dynamic channel assignment; control plane anchored to macro layer.</p><div class="formula">split(cell, demand):<br>if demand ≤ capacity: return<br>deploy micro layer<br>divide radius by 2<br>recurse on overloaded child cells<br>borrow idle channels if SIR-safe</div></div>
+    </div>
+  </div>
+  <div class="grid two" style="margin-top:16px">
+    <div class="card"><h3 class="section-title">Preprocessing and cost ownership</h3><table><tr><th>Work item</th><th>Purpose</th><th>Cost bearer</th></tr><tr><td>Traffic heat map</td><td>Busy-hour demand by block</td><td>Operator / planning team</td></tr><tr><td>Propagation survey</td><td>Path loss, shadowing, clutter</td><td>Operator</td></tr><tr><td>Hex-grid & candidate sites</td><td>Coverage and site count</td><td>Operator + site owner</td></tr><tr><td>Drive test / tuning</td><td>Validate SIR and coverage</td><td>Operator</td></tr></table></div>
+    <div class="card"><h3 class="section-title">Strategy trade-offs</h3><table><tr><th>Strategy</th><th>Strength</th><th>Limitation</th></tr><tr><td>Fixed reuse</td><td>Predictable, simple</td><td>Trunking loss when N grows</td></tr><tr><td>Sectorised</td><td>Fewer strong interferers</td><td>More antennas / handoffs</td></tr><tr><td>Hierarchical</td><td>Targets hotspots efficiently</td><td>Higher site and coordination cost</td></tr></table><div class="callout">Control channels must remain reachable and coordinated; traffic-channel borrowing is allowed only when the neighbour's interference and blocking constraints remain satisfied.</div></div>
+  </div>
+</section>
+
+<section class="view" id="capacity">
+  <div class="grid two">
+    <div class="card"><h3 class="section-title">Hexagonal geometry & capacity</h3><p class="section-sub">Live results from the selected radius, cluster size and sectoring.</p>
+      <div class="result-grid">
+        <div class="result"><small>Hex cell area</small><strong id="cellArea">1.27</strong><small>km²</small></div>
+        <div class="result"><small>Cells to cover</small><strong id="cellCount">10</strong></div>
+        <div class="result"><small>Channels / cell</small><strong id="channelsCell">48</strong></div>
+        <div class="result"><small>Reuse distance D</small><strong id="reuseD">3.21</strong><small>km</small></div>
+        <div class="result"><small>Reuse ratio Q</small><strong id="reuseQ">4.58</strong></div>
+        <div class="result"><small>Offered traffic</small><strong id="offered">250</strong><small>Erlangs</small></div>
+      </div>
+      <div class="formula" style="margin-top:14px">Acell = (3√3 / 2) R²<br>N = i² + ij + j²<br>D = R√(3N), Q = D/R = √(3N)<br>channels/cell ≈ floor(336/N)</div>
+    </div>
+    <div class="card"><h3 class="section-title">Interference estimate</h3><p class="section-sub">First-tier approximation; sectoring reduces effective interferer count.</p>
+      <div class="metric-value" id="sirBig">18.0 dB</div><div class="metric-foot">Estimated cell-edge SIR</div>
+      <div class="progress"><span id="sirBar" style="width:75%"></span></div>
+      <div class="result-grid" style="margin-top:15px"><div class="result"><small>Interferers (effective)</small><strong id="interferers">2</strong></div><div class="result"><small>Target SIR</small><strong id="targetOut">12 dB</strong></div><div class="result"><small>Margin</small><strong id="sirMargin">+6 dB</strong></div></div>
+      <div class="callout">Approximation: SIR ≈ (D/R)<sup>n</sup> / i₀. The classical six-equidistant-interferer check for N=7, n=4 is approximately 18.7 dB. Sectoring changes i₀ only when antenna orientation and beam patterns support the assumed suppression.</div>
+    </div>
+  </div>
+  <div class="grid two" style="margin-top:16px">
+    <div class="card"><h3 class="section-title">Erlang-B blocking model</h3><p class="section-sub">Recursive Erlang-B formula calculates carried traffic for each channel pool.</p><div class="result-grid"><div class="result"><small>Traffic per cell</small><strong id="trafficCell">—</strong><small>Erlangs @ 2% GoS</small></div><div class="result"><small>System capacity</small><strong id="systemCap">—</strong><small>Erlangs</small></div><div class="result"><small>Estimated blocking</small><strong id="blocking">—</strong></div></div><div class="formula">B(0,A)=1<br>B(c,A)= A·B(c−1,A) / (c + A·B(c−1,A))</div></div>
+    <div class="card"><h3 class="section-title">Capacity versus cluster size</h3><p class="section-sub">Larger N improves reuse distance but reduces channels allocated to each cell.</p><div class="chartbox smallchart"><canvas id="clusterChart"></canvas></div></div>
+  </div>
+</section>
+
+<section class="view" id="scaling">
+  <div class="grid two">
+    <div class="card"><h3 class="section-title">Repeated cell-splitting model</h3><p class="section-sub">Uniform split: each cell becomes four child cells and radius halves.</p>
+      <div class="field-grid"><div class="field"><label>Base cell capacity C₀ (Erlangs)</label><input id="baseCap" type="number" value="8" min="1"></div><div class="field"><label>Target demand per original cell (E)</label><input id="targetCap" type="number" value="80" min="1"></div><div class="field"><label>Fraction of cells split</label><input id="splitFraction" type="number" value="0.25" min="0.01" max="1" step=".05"></div></div>
+      <div class="btn-row"><button class="btn" onclick="solveSplitting()">Solve recurrence</button></div>
+      <div class="result-grid" style="margin-top:16px"><div class="result"><small>Uniform rounds k</small><strong id="rounds">2</strong></div><div class="result"><small>Sites after k rounds</small><strong id="sitesAfter">—</strong></div><div class="result"><small>Radius after k</small><strong id="radiusAfter">—</strong></div></div>
+      <div class="formula" style="margin-top:12px">Uniform: Cₖ = 4ᵏ C₀; Rₖ = R₀/2ᵏ<br>Selective: Mₖ₊₁ = Mₖ + 3fMₖ = Mₖ(1+3f)<br>Per split P′ = P/2ⁿ (given model)<br>Handoff load ∝ 1/R</div>
+    </div>
+    <div class="card"><h3 class="section-title">Scaling laws</h3><table><tr><th>Quantity</th><th>Relationship</th><th>Implication</th></tr><tr><td>Cell count</td><td>∝ 1/R²</td><td>Halving R gives ~4× sites</td></tr><tr><td>Reuse distance</td><td>D = R√(3N)</td><td>Falls with smaller R</td></tr><tr><td>SIR</td><td>∝ N<sup>n/2</sup></td><td>Higher N improves isolation</td></tr><tr><td>Channels / cell</td><td>≈ 336/N</td><td>Higher N lowers local pool</td></tr><tr><td>Handoff rate</td><td>∝ speed/R</td><td>More signalling at small cells</td></tr></table><div class="callout">At 100,000 subscribers the offered busy-hour load is 2,500 Erlangs. A single macro-only reuse plan is unlikely to be economical; use selective small cells and traffic offload while retaining the macro coverage layer.</div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3 class="section-title">Split growth by round</h3><div class="chartbox"><canvas id="splitChart"></canvas></div></div>
+</section>
+
+<section class="view" id="event">
+  <div class="event-banner"><h2>Day-4 event scenario · Stadium zone</h2><p>25,000 attendees × 0.05 Erlang each · 1 km² · four-hour surge · approximately twice monthly</p></div>
+  <div class="grid metrics">
+    <div class="card"><div class="metric-label">Event offered traffic</div><div class="metric-value">1,250 E</div><div class="metric-foot">25,000 × 0.05 Erlang</div></div>
+    <div class="card"><div class="metric-label">Event traffic density</div><div class="metric-value">1,250 E/km²</div><div class="metric-foot">Within 1 km² stadium zone</div></div>
+    <div class="card"><div class="metric-label">Township baseline density</div><div class="metric-value" id="baseDensity">20.8 E/km²</div><div class="metric-foot">Based on current subscriber selection</div></div>
+    <div class="card"><div class="metric-label">Density multiplier</div><div class="metric-value" id="densityRatio">60×</div><div class="metric-foot">Event zone versus township average</div></div>
+  </div>
+  <div class="grid two">
+    <div class="card"><h3 class="section-title">Event capacity stress test</h3><p class="section-sub">Compare stadium demand with an illustrative local channel pool.</p>
+      <div class="field-grid"><div class="field"><label>Channels available to stadium</label><input id="eventChannels" type="number" value="48" min="1"></div><div class="field"><label>Temporary microcells / sectors</label><input id="eventCells" type="number" value="12" min="1"></div><div class="field"><label>Channels per temporary cell</label><input id="eventChPerCell" type="number" value="48" min="1"></div></div>
+      <div class="btn-row"><button class="btn" onclick="calculateEvent()">Evaluate event design</button></div>
+      <div class="result-grid" style="margin-top:15px"><div class="result"><small>Local channel pool</small><strong id="eventPool">576</strong></div><div class="result"><small>Approx. 2% load capacity</small><strong id="eventCapacity">—</strong><small>Erlangs</small></div><div class="result"><small>Estimated blocking</small><strong id="eventBlocking">—</strong></div></div>
+    </div>
+    <div class="card"><h3 class="section-title">Decision</h3><div class="recommend"><strong>MODIFY temporarily — do not permanently redesign the township.</strong><br>Deploy event-time cells-on-wheels / temporary microcells, sectorise the stadium, enable coordinated dynamic channel borrowing and apply admission control. Keep the macro layer for continuity and mobility.</div><ul class="muted"><li>Four-hour predictable surge makes temporary capacity more economical than permanent sites.</li><li>Use low-power stadium cells to contain interference and reduce spillover.</li><li>Plan backhaul, power, synchronisation and handover zones before event day.</li><li>Twice-monthly frequency justifies a reusable temporary deployment kit.</li></ul></div>
+  </div>
+  <div class="callout">Important spectrum constraint: temporary cells do not create new licensed spectrum. Their capacity comes from spatial reuse, sectorisation, tighter interference coordination and borrowing idle resources. If the same channels cannot be reused at the required SIR, the offered load must be reduced through Wi-Fi offload, admission control or operator-supported spectrum sharing.</div>
+</section>
+
+<section class="view" id="simulation">
+  <div class="card"><h3 class="section-title">Reproducible strategy comparison</h3><p class="section-sub">Seeded Monte-Carlo-style location sampling with a first-tier interference approximation. It is an educational front-end model, not a radio-planning certification tool.</p>
+    <div class="field-grid"><div class="field"><label>Subscriber test set</label><select id="simSubs"><option>1000</option><option selected>10000</option><option>20000</option><option>100000</option></select></div><div class="field"><label>Monte Carlo samples</label><select id="samples"><option>500</option><option selected>2000</option><option>5000</option></select></div><div class="field"><label>Random seed</label><input id="seed" type="number" value="42"></div></div>
+    <div class="btn-row"><button class="btn" onclick="runSimulation()">Run comparison</button><button class="btn secondary" onclick="exportCSV()">Export results CSV</button></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3 class="section-title">Strategy results</h3><div class="table-wrap"><table id="simTable"><thead><tr><th>Strategy</th><th>Mean SIR</th><th>5th percentile</th><th>Outage</th><th>Channels / cell</th><th>Blocking</th><th>Cells</th><th>Runtime</th></tr></thead><tbody><tr><td colspan="8" class="muted">Run the comparison to generate results.</td></tr></tbody></table></div></div>
+  <div class="grid two" style="margin-top:16px"><div class="card"><h3 class="section-title">SIR distribution</h3><div class="chartbox"><canvas id="sirChart"></canvas></div></div><div class="card"><h3 class="section-title">Blocking versus offered load</h3><div class="chartbox"><canvas id="blockChart"></canvas></div></div></div>
+  <div class="callout">Validation anchor: for N=7 and n=4, six equal-distance first-tier interferers should yield about 18.7 dB. This interface uses SIR ≈ (√(3N))ⁿ / i₀ and applies a simplified sectoring factor; exact results require antenna-pattern integration and site-specific geometry.</div>
+</section>
+<div class="footer">CELPLAN LAB · Educational planning simulator · Validate all deployment decisions with measured propagation and operator-grade RF tools.</div>
+</main></div>
+  <script src="script.js"></script>
+</body>
+</html>
